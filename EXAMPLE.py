@@ -1,7 +1,7 @@
 import requests
 import json
-import time
 
+# Define an array of IMDb IDs
 imdb_ids = [
     "tt0111161", "tt0068646", "tt0071562", "tt0468569", "tt0050083", "tt0108052", "tt0167260", "tt0110912", 
     "tt0120737", "tt0137523", "tt0109830", "tt0080684", "tt1375666", "tt0167261", "tt0073486", "tt0099685", 
@@ -29,60 +29,33 @@ imdb_ids = [
     "tt0110357", "tt0057012", "tt0112573", "tt0055630", "tt0056592", "tt0042876", "tt0036775", "tt0045152"
 ]
 
+# Example IDs for "Guardians of the Galaxy Vol. 2", "The Avengers", "Inception"
+api_key = "193f21c7"  # Replace with your actual OMDb API key
 
-# Initialize list to store movie data
-movies_data = []
+# Set headers to disable caching and add User-Agent
+headers = {
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
+    "User-Agent": "Mozilla/5.0"
+}
+
+# Initialize an empty list to store movie data
+all_movie_data = []
 
 # Loop through each IMDb ID and fetch data
 for imdb_id in imdb_ids:
-    url = f"https://search.imdbot.workers.dev/?tt={imdb_id}"
-    response = requests.get(url)
+    url = f"http://www.omdbapi.com/?i={imdb_id}&apikey={api_key}"
+    response = requests.get(url, headers=headers)
     
     # Check if request was successful
     if response.status_code == 200:
         movie_data = response.json()
-        
-        # Parse data
-        title = movie_data.get("short", {}).get("name", "N/A")
-        plot = movie_data.get("short", {}).get("description", "N/A")
-        content_rating = movie_data.get("short", {}).get("contentRating", "N/A")
-        genres = movie_data.get("short", {}).get("genre", [])
-        rating = movie_data.get("short", {}).get("aggregateRating", {}).get("ratingValue", "N/A")
-        
-        # Actors and directors
-        actors = [actor["name"] for actor in movie_data.get("short", {}).get("actor", [])]
-        directors = [director["name"] for director in movie_data.get("short", {}).get("director", [])]
-        
-        # Release year and keywords
-        release_year = movie_data.get("top", {}).get("releaseYear", {}).get("year", "N/A")
-        keywords = [keyword["node"]["text"] for keyword in movie_data.get("top", {}).get("keywords", {}).get("edges", [])]
-        
-        # Store the data in a dictionary
-        movie_info = {
-            "IMDb ID": imdb_id,
-            "Title": title,
-            "Plot": plot,
-            "Content Rating": content_rating,
-            "Genres": genres,
-            "Rating": rating,
-            "Actors": actors,
-            "Directors": directors,
-            "Release Year": release_year,
-            "Keywords": keywords
-        }
-        
-        # Append movie information to the list
-        movies_data.append(movie_info)
-        
-        # Optional: Wait for a short period to avoid rate limiting
-        time.sleep(1)  # Waits 1 second before the next request
-
+        all_movie_data.append(movie_data)  # Add the movie data to the list
     else:
         print(f"Failed to fetch data for {imdb_id}, Status Code: {response.status_code}")
 
-# Save data to a JSON file
-with open("movies.json", "w") as f:
-    json.dump(movies_data, f, indent=4)
-print("Collected movies data:", movies_data)
+# Save all the movie data to a JSON file
+with open("movies_data.json", "w") as json_file:
+    json.dump(all_movie_data, json_file, indent=4)
 
-print("Data collection complete! Saved to movies.json")
+print("All movie data has been saved to movies_data.json")
