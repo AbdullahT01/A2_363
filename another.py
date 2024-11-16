@@ -276,7 +276,7 @@ if response_tmdb.status_code == 200 and response_keywords.status_code == 200:
     #         print(f" - {language['name']} (Code: {language['iso_639_1']})")
     print(f"TMDB ID: {tmdb_id}")
     print(f"AKAs: {aka}")
-    print(f"Keywords: {keywords}")
+    #print(f"Keywords: {keywords}")
 else:
     print(f"Failed to retrieve data: {response_tmdb.status_code} or {response_keywords.status_code}")
 
