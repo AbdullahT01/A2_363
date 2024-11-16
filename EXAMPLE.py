@@ -29,13 +29,18 @@ imdb_ids = [
     "tt0110357", "tt0057012", "tt0112573", "tt0055630", "tt0056592", "tt0042876", "tt0036775", "tt0045152"
 ]
 
+# Define your IMDb ID and OMDb API key
 
+api_key = "193f21c7"  # Replace with your actual OMDb API key
+
+# URL to fetch data from OMDb
+#url = f"http://www.omdbapi.com/?i={imdb_ids}&apikey={api_key}"
 # Initialize list to store movie data
 movies_data = []
 
 # Loop through each IMDb ID and fetch data
 for imdb_id in imdb_ids:
-    url = f"https://search.imdbot.workers.dev/?tt={imdb_id}"
+    url = f"http://www.omdbapi.com/?i={imdb_id}&apikey={api_key}"
     response = requests.get(url)
     
     # Check if request was successful
@@ -56,6 +61,8 @@ for imdb_id in imdb_ids:
         # Release year and keywords
         release_year = movie_data.get("top", {}).get("releaseYear", {}).get("year", "N/A")
         keywords = [keyword["node"]["text"] for keyword in movie_data.get("top", {}).get("keywords", {}).get("edges", [])]
+
+
         
         # Store the data in a dictionary
         movie_info = {
@@ -75,7 +82,7 @@ for imdb_id in imdb_ids:
         movies_data.append(movie_info)
         
         # Optional: Wait for a short period to avoid rate limiting
-        time.sleep(1)  # Waits 1 second before the next request
+        time.sleep(2)  # Waits 1 second before the next request
 
     else:
         print(f"Failed to fetch data for {imdb_id}, Status Code: {response.status_code}")
