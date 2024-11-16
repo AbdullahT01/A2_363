@@ -318,7 +318,8 @@ else:
             cur.execute(insert_movie_keyword_query, (movie_id, keyword_id))
 
         #here actor
-        for actor in actors:
+        actor_list = actors.split(',')
+        for actor in actor_list:
             actor_name = actor
             
             insert_actor_query = """
@@ -328,7 +329,7 @@ else:
             cur.execute(insert_actor_query, (actor_name,))
 
 
-        for actor in actors:
+        for actor in actor_list:
             cur.execute("SELECT actor_id FROM actor WHERE actor_name = %s", (actor,))
             actor_id = cur.fetchone()[0]
     
@@ -339,7 +340,8 @@ else:
             cur.execute(insert_movie_actor_query, (movie_id, actor_id))
         
         #here director
-        for director_ in director:
+        director_list = director.split(',')
+        for director_ in director_list:
             director_name = director_
             
             insert_director_query = """
@@ -349,7 +351,7 @@ else:
             cur.execute(insert_director_query, (director_name,))
 
 
-        for director_ in director:
+        for director_ in director_list:
             cur.execute("SELECT director_id FROM director WHERE director_name = %s", (director_,))
             director_id = cur.fetchone()[0]
     
