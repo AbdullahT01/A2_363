@@ -2,9 +2,6 @@ import requests
 import json
 import psycopg2
 
-# def insert(title,description,rating ,release_year ,imdb_id ,actors ,director ,content_rating ,runtime ,keywords ,tmdb_id ,aka ,production_countries ,spoken_languages ,genres ):
-#     conn.commit()
-
 
 hostname = "localhost"
 database = "Assignment 2 SOEN 363"
@@ -13,7 +10,7 @@ pwd = "mac1"
 port_id = 5432
 
 conn = psycopg2.connect(
-    host=hostname,  # Corrected: added commas
+    host=hostname,  
     dbname=database,
     user=username,
     password=pwd,
@@ -21,7 +18,7 @@ conn = psycopg2.connect(
 )
 cur = conn.cursor()
 
-# Create a new table
+
 cur.execute("""
 CREATE TABLE IF NOT EXISTS movie (
     movie_id SERIAL PRIMARY KEY ,
@@ -107,14 +104,58 @@ CREATE TABLE IF NOT EXISTS movie_language (
     FOREIGN KEY (language_id) REFERENCES language(language_id)
 );
 
+CREATE TABLE IF NOT EXISTS review (
+    review_id SERIAL PRIMARY KEY ,
+    review TEXT NOT NULL  
+);
+CREATE TABLE IF NOT EXISTS movie_review (
+    movie_id INTEGER,
+    review_id INTEGER,
+    PRIMARY KEY (movie_id , review_id),
+    FOREIGN KEY (movie_id) REFERENCES movie(movie_id),
+    FOREIGN KEY (review_id) REFERENCES review(review_id)
+);           
+
+
 """)
 conn.commit()
 
-api_keyOMDb  = "193f21c7"  # Replace with your actual OMDb API key
+api_keyOMDb  = "193f21c7"  
 api_keytmdb = "db70b73908eae1aff117991c8ef4bff2"
 
+
+def get_reviews(movie_id):
+    url = f'https://api.themoviedb.org/3/movie/{movie_id}/reviews?api_key={api_keytmdb}'
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        reviews = response.json()['results']
+        return reviews
+    else:
+        print(f"Error fetching reviews for movie ID {movie_id}: {response.status_code}")
+        return []
+
+def insert_review(review_content):
+    
+    cur.execute("INSERT INTO review (review) VALUES (%s) RETURNING review_id", (review_content,))
+    review_id = cur.fetchone()[0]
+    conn.commit()
+    
+    return review_id
+
+# Function to associate a review with a movie
+def associate_movie_review(movie_id, review_id):
+    
+    cur.execute(
+        "INSERT INTO movie_review (movie_id, review_id) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+        (movie_id, review_id)
+    )
+    conn.commit()
+    
+
+
 #, "tt0111161", "tt0108052", "tt0081398", "tt0144084" 
-# 50 ids for both 107
+#  ids for both 107
 imdb_idsList = [
    "tt0111161", "tt0068646", "tt0468569", "tt0110912", "tt0109830", "tt0133093", "tt0167260", "tt0080684", "tt0137523", "tt1375666", "tt0110357", "tt0099685", "tt0172495", "tt0071562", "tt1345836", "tt0088763", "tt0108052", "tt0076759", "tt0407887", "tt0120689", "tt0482571", "tt0114814", "tt0102926", "tt0816692", "tt1285016", "tt0034583", "tt0033467", "tt0050083", "tt0066921", "tt0081505", "tt2582802", "tt1663202", "tt0120586", "tt0114369", "tt0120737", "tt0234215", "tt0242653", "tt0120338", "tt4154796", "tt2313197", "tt0107290", "tt0317705", "tt4633694", "tt10872600", "tt0993846", "tt0264464", "tt0167261", "tt0118715", "tt0043014", "tt0268978", "tt0120382", "tt2278388", "tt0032138", "tt0361748", "tt1596363", "tt0031381", "tt0099674", "tt0088847", "tt0964517", "tt0070047", "tt0075314", "tt0088247", "tt0083658", "tt1431045", "tt4154756", "tt3659388", "tt1392190", "tt0093779", "tt0110413", "tt0086250", "tt2015381", "tt0078748", "tt1130884", "tt0209144", "tt0060196", "tt0359950", "tt0477348", "tt0129167", "tt0073195", "tt0829482", "tt0357413", "tt1119646", "tt0071853", "tt0107048", "tt0109686", "tt0443453", "tt0091042", "tt0365748", "tt0838283", "tt1232829", "tt0910936", "tt0942385", "tt0396269", "tt0425112", "tt1478338", "tt0247745", "tt0405422", "tt0265666", "tt0080339", "tt0109040", "tt0071230", "tt0080487", "tt0087332", "tt0094012", "tt0095705", "tt0109445", "tt0079367"
 ]
@@ -124,19 +165,19 @@ tmdb_idsList = [
     "278", "238", "155", "680", "13", "603", "122", "1891", "550", "27205", "420818", "769", "98", "240", "49026", "105", "424", "11", "1422", "497", "1124", "629", "274", "157336", "37799", "289", "15", "389", "185", "694", "244786", "281957", "73", "807", "120", "604", "605", "597", "299534", "123025", "329", "9806", "324857", "634649", "106646", "640", "121", "115", "599", "453", "37165", "120467", "630", "16869", "318846", "770", "242", "2108", "45317", "9552", "103", "218", "78", "293660", "299536", "286217", "76341", "2493", "101", "111", "447365", "348", "11324", "77", "429", "116745", "6977", "10386", "578", "8363", "8699", "18785", "762", "137", "8467", "740985", "9377", "747", "12133", "64688", "10189", "7446", "9522", "4638", "55721", "39939", "6957", "9428", "813", "3049", "11072", "11977", "620", "957", "37136", "2292", "6471"
     
 ]
-# Ensure that both lists have the same length
+
 if len(imdb_idsList) != len(tmdb_idsList):
     print(len(imdb_idsList))
     print(len(tmdb_idsList))
     print("Error: IMDb and TMDB ID lists have different lengths.")
 else:
-    # Loop through the lists using index to fetch data for both IMDb and TMDB IDs
+    
     for i in range(len(imdb_idsList)):
         imdb_id = imdb_idsList[i]
         tmdb_id = tmdb_idsList[i]
         print("\n-----------------------------------\n")
         print("\n-----------------------------------\n")
-        # Fetching IMDb data
+      
         url_omdb = f"http://www.omdbapi.com/?i={imdb_id}&apikey={api_keyOMDb}"
         response_omdb = requests.get(url_omdb)
 
@@ -157,11 +198,11 @@ else:
         production_countries = None
         spoken_languages = None
         genres = None
-
+        reviews=None
         if response_omdb.status_code == 200:
             movie_data_omdb = response_omdb.json()
             if movie_data_omdb.get("Response") == "True":
-                # Save or print the required information for IMDB
+                
                 title = movie_data_omdb.get("Title", "N/A")
                 description = movie_data_omdb.get("Plot", "N/A")
                 rating = movie_data_omdb.get("imdbRating", "N/A")
@@ -171,7 +212,7 @@ else:
                 director = movie_data_omdb.get("Director", "N/A")
                 content_rating = movie_data_omdb.get("Rated", "N/A")
                 runtime = movie_data_omdb.get("Runtime", "N/A")
-            # Print the extracted details
+         
                 print(f"Title: {title}")
                 print(f"Description: {description}")
                 print(f"Rating: {rating}")
@@ -186,42 +227,41 @@ else:
         else:
             print(f"Failed to fetch IMDb data for {imdb_id}, Status Code: {response_omdb.status_code}")
         
-        # Fetching TMDB data
+       
         url_tmdb = f"https://api.themoviedb.org/3/movie/{tmdb_id}"
         params = {"api_key": api_keytmdb}
         response_tmdb = requests.get(url_tmdb, params=params)
         print("\n-----------------------------------\n")
         url_keywords = f"https://api.themoviedb.org/3/movie/{tmdb_id}/keywords"
+
         if response_tmdb.status_code == 200:
             movie_data_tmdb = response_tmdb.json()
             response_keywords = requests.get(url_keywords, params=params)
-            if movie_data_tmdb.get("status_code") != 34:  # Check for a valid response
-                # Save or print the required information for TMDB
+
+            if movie_data_tmdb.get("status_code") != 34:  
+               
                 keywords_data = response_keywords.json()
-    # keywords = [keyword['name'] for keyword in keywords_data.get("keywords", [])]
+    
                 keywords = keywords_data.get("keywords", [])
                 tmdb_id = movie_data_tmdb.get("id")
                 aka1 = movie_data_tmdb.get("title",[] )
                 aka2= movie_data_tmdb.get("tagline" ,[])
                 aka = [aka1,aka2]
-   # keywords = keywords_data.get("keywords", [])
+   
                 production_countries = movie_data_tmdb.get("production_countries", [])
     
-    # Print country name and code
+   
                 print("Production Countries:")
                 for country in production_countries:
                     print(f"Country: {country['name']}, Code: {country['iso_3166_1']}")
 
                 spoken_languages = movie_data_tmdb.get("spoken_languages", [])
                 genres = movie_data_tmdb.get("genres", [])
-                #print(f"Keywords: {keywords}")
+               
                 print("Keywords:")
                 for key in keywords:
                     print(f"Keyword: {key['name']}")
-                #print(f"Production Countries: {production_countries}")
-    # Print the genres
-                #print(f"Genres: {genres}")
-                #print(f"Language Spoken: {spoken_languages}")
+                
                 print("Genres:")
                 for genre in genres:
                     print(f" - {genre['name']}")
@@ -249,7 +289,7 @@ else:
         print(f"tmdb_id before query: {tmdb_id}")
         cur.execute("SELECT movie_id FROM movie WHERE tmdb_id = %s", (str(tmdb_id),))
         movie_id = cur.fetchone()[0]
-    # Execute the query
+    
         conn.commit()
 
 
@@ -380,12 +420,31 @@ else:
             INSERT INTO movie_language (movie_id, language_id)
             VALUES (%s, %s)ON CONFLICT (movie_id, language_id) DO NOTHING;"""
             cur.execute(insert_movie_language_query, (movie_id, language_id))
+
+        #reviews
+
+
+
+
+        reviews = get_reviews(movie_id)
+        for review in reviews:
+            
+            review_content = review['content']
+        
+        
+            review_id = insert_review(review_content)
+        
+       
+            associate_movie_review(movie_id, review_id)
+
+
+
+
+
+        print("\n-----------------------------------\n")
+        print("\n-----------------------------------\n")
         conn.commit()
 
-
-    # Commit the changes to the database
-        
-        print("\n-----------------------------------\n")
-        print("\n-----------------------------------\n")
+conn.commit()
 cur.close()
 conn.close()

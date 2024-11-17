@@ -9,7 +9,7 @@ pwd = "mac1"
 port_id = 5432
 
 # List of tables to drop
-tables_to_drop = ["movie", "genre", "movie_genre", "country", "movie_country", "actor", "movie_actor","director","movie_director","language", "movie_language", "keyword", "movie_keyword"]
+tables_to_drop = ["movie", "genre", "movie_genre", "country", "movie_country", "actor", "movie_actor","director","movie_director","language", "movie_language", "keyword", "movie_keyword", "review", "movie_review"]
 
 try:
     # Establish connection to the PostgreSQL database
