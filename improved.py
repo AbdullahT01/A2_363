@@ -6,7 +6,7 @@ import psycopg2
 hostname = "localhost"
 database = "Assignment 2 SOEN 363"
 username = "postgres"
-pwd = "mac1"
+pwd = "12345"
 port_id = 5432
 
 conn = psycopg2.connect(
