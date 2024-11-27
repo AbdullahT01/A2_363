@@ -41,7 +41,7 @@
 --Question 7e)
  SELECT l.language_name AS Language, COUNT(mLanguage.movie_id) AS number_movie
  FROM language l
- JOIN movie_language mLanguage ON l.language_id ---------------------------------------= mLanguage.language_id
+ JOIN movie_language mLanguage ON l.language_id = mLanguage.language_id
  GROUP BY l.language_id
  ORDER BY number_movie DESC;
 --Question 7f)

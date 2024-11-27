@@ -4,7 +4,7 @@ import psycopg2
 hostname = "localhost"
 database = "Assignment 2 SOEN 363"
 username = "postgres"
-pwd = "12345"
+pwd = "mac1"
 port_id = 5432
 
 # List of tables to drop
