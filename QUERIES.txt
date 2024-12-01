@@ -1,3 +1,10 @@
+
+----- Set watchmode_id
+MATCH (movie:Movie)
+WHERE movie.title = 'The Godfather'
+SET movie.watchmode_id = '8887'
+
+
 ----- A [5 pts] Find all movies that are played by a sample actor.
 MATCH (a:Actor)-[:ACTOR_MOVIE]->(m:Movie)
 WHERE a.first_name ='Morgan' AND a.last_name = 'Freeman'

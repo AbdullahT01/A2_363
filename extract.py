@@ -2,7 +2,7 @@
 import requests
 import json
 import psycopg2
-
+#1. JSON
 
 hostname = "localhost"
 database = "Assignment 2 SOEN 363"
@@ -20,7 +20,8 @@ conn = psycopg2.connect(
 cur = conn.cursor()
 
 while True:
-    
+    print("Assignment 3 SOEN 363")
+    print("Abdullah Taha - Alessandro Tiseo")
     print("Select an option:")
     print("1. Create JSON")
     print("2. Exit")
@@ -235,11 +236,11 @@ while True:
         
         file = "movies.json"
 
-        # Write the dictionary to a JSON file
+        # JSON file writing 
         with open(file, "w", encoding="utf-8") as json_file:
             json.dump(movie_dict, json_file, indent=4, ensure_ascii=False)
 
-        print(f"Data successfully written to {file}")   
+        print(f"Data written to {file}")   
     
     elif choice == '2':
         print("Exiting the program.")
