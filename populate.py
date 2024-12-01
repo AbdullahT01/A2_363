@@ -23,8 +23,9 @@ import json
 # WHERE m.release_year > 2023 AND m.rating >= 5
 # RETURN m.title AS MovieTitle, m.release_year AS Release_Year, m.rating AS Rating
 #
-#
-#
+# MATCH (m:Movie)-[:MOVIE_COUNTRY]->(c:Country)
+# WHERE c.country_name = "Germany" OR c.country_name = "United States of America"
+# RETURN m
 #
 
 
@@ -55,7 +56,7 @@ while True:
    
     if choice == '1':
         print("it works ")
-        with open("movies.json", "r") as file:
+        with open("movies.json", "r", encoding="utf-8") as file:
             data = json.load(file)
 
 

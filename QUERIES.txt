@@ -1,0 +1,68 @@
+----- A [5 pts] Find all movies that are played by a sample actor.
+MATCH (a:Actor)-[:ACTOR_MOVIE]->(m:Movie)
+WHERE a.first_name ='Morgan' AND a.last_name = 'Freeman'
+RETURN m.title AS MovieTitle, m.release_year AS ReleaseYear, a.first_name AS firstname, a.last_name AS lastname
+
+------B [5 pts] Find the number of movies with and without a watch-mode info.
+
+
+
+MATCH (m:Movie)
+RETURN 
+   COUNT(CASE WHEN m.watchmode_id IS NOT NULL THEN 1 END) AS with_watchmode,
+   COUNT(CASE WHEN m.watchmode_id IS NULL THEN 1 END) AS without_watchmode
+
+
+
+
+------C [5 pts] Find all movies that are released after the year 2023 and has a viewer rating
+of at least 5.
+
+
+Note in our db there does not exist a movie above 5 release in 2023
+MATCH (m:Movie)
+WHERE m.release_year > 2023 AND m.rating >= 5
+RETURN m.title AS MovieTitle, m.release_year AS Release_Year, m.rating AS Rating
+
+
+
+-----D [5 pts] Find all movies with two countries of your choice. Make sure your query returns
+more than one movie. List movies that may be associated with either of the countries
+(not necessarily both).
+
+
+MATCH (m:Movie)-[:MOVIE_COUNTRY]->(c:Country)
+WHERE c.country_name = "Germany" OR c.country_name = "United States of America"
+RETURN m.title AS movieName, c.country_name AS movieCountry
+
+
+-----E [10 pts] Find top 2 movies with largest number of keywords.
+
+
+
+MATCH (m:Movie)-[:MOVIE_KEYWORD]->(k:Keyword)
+WITH m, COUNT(k) AS keywordCount
+RETURN m.title AS movieTitle, keywordCount
+ORDER BY keywordCount DESC
+LIMIT 2
+
+----F [10 pts] Find top 5 movies (ordered by rating) in a language of your choice.
+
+
+MATCH (m:Movie)
+WHERE m.rating IS NOT NULL AND m.languages = "English (en)"
+RETURN m.title AS movieTitle, m.languages AS movieLanguage, m.rating AS movieRating
+ORDER BY movieRating DESC
+LIMIT 5
+
+
+-----G [5 pts] Build full text search index to query movie plots.
+
+CREATE FULLTEXT INDEX moviePlot FOR (m:Movie) ON EACH [m.description]
+
+
+
+-----H [5 pts] Write a full text search query and search for some sample text of your choice.
+
+CALL db.index.fulltext.queryNodes("moviePlot", "former") YIELD node, score 
+RETURN node.title, node.description, score
