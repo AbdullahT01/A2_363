@@ -72,9 +72,9 @@ while True:
         
 
                 setWatchMode = """
-                        MATCH (n)
-                        WHERE n.watchmode_id = "None"
-                        SET n.watchmode_id = null
+                        MATCH (movie:Movie)
+                        WHERE movie.watchmode_id = "None"
+                        SET movie.watchmode_id = null
                          """
 
                
